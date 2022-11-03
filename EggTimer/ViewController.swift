@@ -10,75 +10,62 @@ import UIKit
 
 class ViewController: UIViewController {
 
-//    let softTime = 5
-//    let mediumTime = 7
-//    let hardTime = 12
     @IBOutlet weak var timerLabel: UILabel!
+    @IBOutlet weak var progressBar: UIProgressView!
 
-    let eggTimes: [String: Int] = ["Soft": 300, "Medium": 420, "Hard": 720]
+    let eggTimes: [String: Int] = ["Soft": 5, "Medium": 420, "Hard": 720]
     //Dictionary same as: let eggTimes = ["Soft": 5, "Medium": 7, "Hard": 12] minutes
     var isTimerRunning = false
+    var secondsRemaining = 0
+    var totalTime = 0
+    var timer = Timer()
 
     @IBAction func hardnessSelected(_ sender: UIButton) {
         let hardness = sender.currentTitle!
-        let result = eggTimes[hardness]!
-        print(result)
-        var secondsRemaining = result
         if !isTimerRunning {
+            totalTime = eggTimes[hardness]!
+            secondsRemaining = eggTimes[hardness]!
+            progressBar.progress = 0.0
+            progressBar.progressTintColor = UIColor.orange
             timerLabel.text = hardness
             isTimerRunning = true
-            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { (Timer) in
-                if secondsRemaining > 0 {
-                    let minutes = secondsRemaining / 60
-                    var minutesText = ""
-                    if minutes < 10 {
-                        minutesText = "0\(minutes)"
-                    } else {
-                        minutesText = "\(minutes)"
-                    }
-                    
-                    let seconds = secondsRemaining % 60
-                    var secondsText = ""
-                    if seconds < 10 {
-                        secondsText = "0\(seconds)"
-                    } else {
-                        secondsText = "\(seconds)"
-                    }
-                    
-                    self.timerLabel.text = "\(minutesText):\(secondsText)"
-                    secondsRemaining -= 1
-                } else {
-                    self.timerLabel.text = "Done!"
-                    self.isTimerRunning = false
-                    Timer.invalidate()
-                }
-            }
+            timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
+        }
+    }
+
+    @objc func updateCounter() {
+        //example functionality
+        if secondsRemaining > 0 {
+            self.timerLabel.text = secondsToClockStyle(secondsRemaining)
+            progressBar.progress = 1 - (Float(secondsRemaining) / Float(totalTime))
+            secondsRemaining -= 1
+        } else {
+            timer.invalidate()
+            isTimerRunning = false
+            progressBar.progress = 1.0
+            progressBar.progressTintColor = UIColor.green
+            self.timerLabel.text = "Done!"
+        }
+    }
+
+    func secondsToClockStyle(_ secondsToProcess: Int) -> String { //return type String
+        let minutes = secondsToProcess / 60
+        var minutesText = ""
+        if minutes < 10 {
+            minutesText = "0\(minutes)"
+        } else {
+            minutesText = "\(minutes)"
         }
 
-//        if hardness == "Soft" {
-//            print(softTime)
-//            return
-//        }
-//
-//        if hardness == "Medium" {
-//            print(mediumTime)
-//            return
-//        }
-//
-//        if hardness == "Hard" {
-//            print(hardTime)
-//            return
-//        }
-//        switch hardness {
-//        case "Soft":
-//            print(softTime)
-//        case "Medium":
-//            print(mediumTime)
-//        case "Hard":
-//            print(mediumTime)
-//        default:
-//            print("Error egg is overcooked")
-//        }
+        let seconds = secondsToProcess % 60
+        var secondsText = ""
+        if seconds < 10 {
+            secondsText = "0\(seconds)"
+        } else {
+            secondsText = "\(seconds)"
+        }
+
+        return "\(minutesText):\(secondsText)"
     }
 
 }
